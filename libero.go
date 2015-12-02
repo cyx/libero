@@ -49,13 +49,18 @@ func update(kind, metric string, v interface{}) bool {
 	return true
 }
 
-func cast(v interface{}) (int64, error) {
-	if n, ok := v.(int64); ok {
-		return n, nil
-	} else if n, ok := v.(int); ok {
-		return int64(n), nil
+func cast(v interface{}) (n int64, err error) {
+	switch v.(type) {
+	case int32, int:
+		n = int64(v.(int))
+	case int64:
+		n = v.(int64)
+	case time.Duration:
+		n = int64(v.(time.Duration))
+	default:
+		err = fmt.Errorf("Unable to cast %v %T to int64/int/time.Duration", v, v)
 	}
-	return 0, fmt.Errorf("Unable to cast %v %T to int64", v, v)
+	return n, err
 }
 
 func metricName(key string) string {

@@ -2,6 +2,7 @@ package libero
 
 import (
 	"testing"
+	"time"
 
 	"github.com/apg/ln"
 )
@@ -20,6 +21,7 @@ func TestIntercept(t *testing.T) {
 	ln.Info(ln.F{"count#hello.counter": 1})
 	ln.Info(ln.F{"sample#hello.sample": 2})
 	ln.Info(ln.F{"measure#hello.measure": 2})
+	ln.Info(ln.F{"measure#hello.measure": time.Second})
 }
 
 func TestMetricName(t *testing.T) {
