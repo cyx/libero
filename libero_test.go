@@ -1,21 +1,25 @@
 package libero
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/apg/ln"
+)
 
 func init() {
-	var _ Filter = FilterFunc(Librato)
+	var _ ln.Filter = ln.FilterFunc(Librato)
 }
 
 func TestIntercept(t *testing.T) {
-	oldFilters := DefaultLogger.Filters
-	DefaultLogger.Filters = []Filter{FilterFunc(Librato)}
+	oldFilters := ln.DefaultLogger.Filters
+	ln.DefaultLogger.Filters = []ln.Filter{ln.FilterFunc(Librato)}
 	defer func() {
-		DefaultLogger.Filters = oldFilters
+		ln.DefaultLogger.Filters = oldFilters
 	}()
 
-	Info(F{"count#hello.counter": 1})
-	Info(F{"sample#hello.sample": 2})
-	Info(F{"measure#hello.measure": 2})
+	ln.Info(ln.F{"count#hello.counter": 1})
+	ln.Info(ln.F{"sample#hello.sample": 2})
+	ln.Info(ln.F{"measure#hello.measure": 2})
 }
 
 func TestMetricName(t *testing.T) {
