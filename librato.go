@@ -6,12 +6,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/apg/ln"
 	"github.com/rcrowley/go-metrics"
 )
 
 var DefaultSample = metrics.NewUniformSample(100)
 
-func Librato(e Event) bool {
+func Librato(e ln.Event) bool {
 	for k, v := range e.Data {
 		if strings.HasPrefix(k, "count#") {
 			return update("count", metricName(k), v)
