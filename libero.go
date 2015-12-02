@@ -50,8 +50,10 @@ func update(kind, metric string, v interface{}) bool {
 }
 
 func cast(v interface{}) (int64, error) {
-	if v, ok := v.(int64); ok {
-		return v, nil
+	if n, ok := v.(int64); ok {
+		return n, nil
+	} else if n, ok := v.(int); ok {
+		return int64(n), nil
 	}
 	return 0, fmt.Errorf("Unable to cast %v %T to int64", v, v)
 }
