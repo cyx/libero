@@ -23,6 +23,9 @@ func Librato(e ln.Event) bool {
 		if strings.HasPrefix(k, "measure#") {
 			return update("sample", metricName(k), v)
 		}
+		if strings.HasPrefix(k, "gauge#") {
+			return update("gauge", metricName(k), v)
+		}
 	}
 	return false
 }
@@ -41,6 +44,8 @@ func update(kind, metric string, v interface{}) bool {
 		metrics.GetOrRegisterHistogram(metric, metrics.DefaultRegistry, DefaultSample).Update(n)
 	case "measure":
 		metrics.GetOrRegisterTimer(metric, metrics.DefaultRegistry).Update(time.Duration(n))
+	case "gauge":
+		metrics.GetOrRegisterGauge(metric, metrics.DefaultRegistry).Update(n)
 	default:
 		log.Printf("librato.update err: Unknown kind %s", kind)
 		return false
