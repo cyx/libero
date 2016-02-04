@@ -13,21 +13,23 @@ import (
 var DefaultSample = metrics.NewUniformSample(100)
 
 func Librato(e ln.Event) bool {
+	found := false
+
 	for k, v := range e.Data {
 		if strings.HasPrefix(k, "count#") {
-			return update("count", metricName(k), v)
+			found = update("count", metricName(k), v)
 		}
 		if strings.HasPrefix(k, "sample#") {
-			return update("sample", metricName(k), v)
+			found = update("sample", metricName(k), v)
 		}
 		if strings.HasPrefix(k, "measure#") {
-			return update("sample", metricName(k), v)
+			found = update("sample", metricName(k), v)
 		}
 		if strings.HasPrefix(k, "gauge#") {
-			return update("gauge", metricName(k), v)
+			found = update("gauge", metricName(k), v)
 		}
 	}
-	return false
+	return found
 }
 
 func update(kind, metric string, v interface{}) bool {

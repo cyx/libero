@@ -1,6 +1,7 @@
 package libero
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -35,6 +36,29 @@ func TestIntercept(t *testing.T) {
 		ln.Info(ln.F{test.input: test.value})
 		if metrics.Get(test.output) == nil {
 			t.Fatalf("Expected metric %s to be registered, got none", test.output)
+		}
+	}
+}
+
+func TestMassIntercept(t *testing.T) {
+	oldFilters := ln.DefaultLogger.Filters
+	ln.DefaultLogger.Filters = []ln.Filter{ln.FilterFunc(Librato)}
+	defer func() {
+		ln.DefaultLogger.Filters = oldFilters
+	}()
+	f := ln.F{
+		"count#hello.1.count":     1,
+		"sample#hello.1.sample":   2,
+		"measure#hello.1.measure": 3,
+		"measure#hello.2.measure": time.Second,
+		"gauge#hello.1.gauge":     1001,
+	}
+	ln.Info(f)
+
+	for field, _ := range f {
+		field := strings.Split(field, "#")[1]
+		if metrics.Get(field) == nil {
+			t.Fatalf("Expected metric %s to be registered, got none", field)
 		}
 	}
 }
