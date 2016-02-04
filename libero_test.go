@@ -56,3 +56,45 @@ func TestMetricName(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkLibero(b *testing.B) {
+	oldFilters := ln.DefaultLogger.Filters
+	ln.DefaultLogger.Filters = []ln.Filter{ln.FilterFunc(Librato)}
+	defer func() {
+		ln.DefaultLogger.Filters = oldFilters
+	}()
+
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		ln.Info(ln.F{"count#hello.count": 1})
+	}
+	b.StopTimer()
+}
+
+func BenchmarkLiberoBatched(b *testing.B) {
+	oldFilters := ln.DefaultLogger.Filters
+	ln.DefaultLogger.Filters = []ln.Filter{ln.FilterFunc(Librato)}
+	defer func() {
+		ln.DefaultLogger.Filters = oldFilters
+	}()
+
+	b.StartTimer()
+	counter := 0
+	for i := 0; i < b.N; i++ {
+		counter++
+		if counter%1000 == 0 {
+			ln.Info(ln.F{"count#hello.count": counter})
+		}
+	}
+	b.StopTimer()
+}
+
+func BenchmarkGoMetrics(b *testing.B) {
+	counter := metrics.GetOrRegisterCounter("hello", metrics.DefaultRegistry)
+
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		counter.Inc(1)
+	}
+	b.StopTimer()
+}
