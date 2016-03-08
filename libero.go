@@ -29,7 +29,7 @@ func Librato(e ln.Event) bool {
 			found = update("gauge", metricName(k), v)
 		}
 	}
-	return found
+	return !found
 }
 
 func update(kind, metric string, v interface{}) bool {

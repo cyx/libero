@@ -1,6 +1,7 @@
 package libero
 
 import (
+	"log"
 	"strings"
 	"testing"
 	"time"
@@ -11,6 +12,18 @@ import (
 
 func init() {
 	var _ ln.Filter = ln.FilterFunc(Librato)
+}
+
+func TestFoundResult(t *testing.T) {
+	res := Librato(ln.Event{Data: ln.F{"count#something": 1}})
+	if res != false {
+		log.Fatal("We should be returning false when intercepted")
+	}
+
+	res = Librato(ln.Event{Message: "hello there"})
+	if res != true {
+		log.Fatal("We should be returning true when _NOT_ intercepted")
+	}
 }
 
 func TestIntercept(t *testing.T) {
