@@ -10,7 +10,10 @@ import (
 	"github.com/rcrowley/go-metrics"
 )
 
-var DefaultSample = metrics.NewUniformSample(100)
+var (
+	defaultSampleReservoirSize = 100
+	samplesRegistry            = make(map[string]metrics.Sample)
+)
 
 func Librato(e ln.Event) bool {
 	found := false
@@ -43,7 +46,7 @@ func update(kind, metric string, v interface{}) bool {
 	case "count":
 		metrics.GetOrRegisterCounter(metric, metrics.DefaultRegistry).Inc(n)
 	case "sample":
-		metrics.GetOrRegisterHistogram(metric, metrics.DefaultRegistry, DefaultSample).Update(n)
+		metrics.GetOrRegisterHistogram(metric, metrics.DefaultRegistry, getOrRegisterSample(metric)).Update(n)
 	case "measure":
 		metrics.GetOrRegisterTimer(metric, metrics.DefaultRegistry).Update(time.Duration(n))
 	case "gauge":
@@ -72,4 +75,11 @@ func cast(v interface{}) (n int64, err error) {
 
 func metricName(key string) string {
 	return key[strings.Index(key, "#")+1:]
+}
+
+func getOrRegisterSample(metric string) metrics.Sample {
+	if samplesRegistry[metric] == nil {
+		samplesRegistry[metric] = metrics.NewUniformSample(defaultSampleReservoirSize)
+	}
+	return samplesRegistry[metric]
 }

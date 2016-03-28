@@ -94,6 +94,21 @@ func TestMetricName(t *testing.T) {
 	}
 }
 
+func TestIsolationOfSamples(t *testing.T) {
+	update("sample", "small_counts", 1)
+	update("sample", "big_counts", 1000000)
+
+	h := metrics.Get("small_counts").(metrics.Histogram)
+	if h.Sample().Mean() != 1 {
+		t.Fatalf("Expected mean to be 1, got %f", h.Sample().Mean())
+	}
+
+	h = metrics.Get("big_counts").(metrics.Histogram)
+	if h.Sample().Mean() != 1000000 {
+		t.Fatalf("Expected mean to be 1,000,000, got %f", h.Sample().Mean())
+	}
+}
+
 func BenchmarkLibero(b *testing.B) {
 	oldFilters := ln.DefaultLogger.Filters
 	ln.DefaultLogger.Filters = []ln.Filter{ln.FilterFunc(Librato)}
