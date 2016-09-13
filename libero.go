@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/apg/ln"
@@ -13,6 +14,7 @@ import (
 var (
 	defaultSampleReservoirSize = 100
 	samplesRegistry            = make(map[string]metrics.Sample)
+	samplesRegistryMutex       = sync.Mutex{}
 )
 
 func Librato(e ln.Event) bool {
@@ -78,6 +80,9 @@ func metricName(key string) string {
 }
 
 func getOrRegisterSample(metric string) metrics.Sample {
+	samplesRegistryMutex.Lock()
+	defer samplesRegistryMutex.Unlock()
+
 	if samplesRegistry[metric] == nil {
 		samplesRegistry[metric] = metrics.NewUniformSample(defaultSampleReservoirSize)
 	}
